@@ -3,79 +3,79 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-root',
   template: `
-    <div echarts [options]="chartOption" class="demo-chart"></div>
+    <div class="charts-container">
+      <div *ngFor="let chart of charts; let i = index" class="chart-wrapper">
+        <div echarts [options]="chart.chartOption" class="demo-chart"></div>
+      </div>
+    </div>
+    <app-chart></app-chart>
   `,
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  chartOption = {
-    title: {
-      text: 'ECharts example'
-    },
-    tooltip: {trigger: 'axis'},
-    xAxis: {
-      type: 'category',
-      data: [] as string[] 
-    },
-    yAxis: {},
-    series: [
-      {
-        name: 'Series 1',
-        type: 'line',
-        data: [] as number[] 
-      },
-      {
-        name: 'Series 2',
-        type: 'line',
-        data: [] as number[]
-      },
-      {
-        name: 'Series 3',
-        type: 'line',
-        data: [] as number[]
-      },
-      {
-        name: 'Series 4',
-        type: 'line',
-        data: [] as number[]
-      }
-    ]
-  };
-
-  dataPoints = 10000; 
-  currentValues = [50, 40, 60, 70]; 
+  charts: { id: number; chartOption: any; currentValues: number[] }[] = [];
+  dataPoints = 10000;
 
   constructor() {
-    this.chartOption.xAxis.data = Array.from({ length: this.dataPoints }, (_, index) => `Time ${index + 1}`);
-    
-
     for (let i = 0; i < 4; i++) {
-      this.chartOption.series[i].data = Array.from({ length: this.dataPoints }, () => this.getRandomValue(i));
+      const chartData = {
+        id: i,
+        chartOption: this.initChart(),
+        currentValues: [50, 40, 60, 70] // Начальные значения
+      };
+
+      // Заполняем график начальными значениями
+      for (let j = 0; j < 4; j++) {
+        chartData.chartOption.series[j].data = Array.from({ length: this.dataPoints }, () => this.getRandomValue(chartData, j));
+      }
+
+      this.charts.push(chartData);
     }
 
-    setInterval(() => this.updateChartData(), 5000);
+    setInterval(() => this.updateAllCharts(), 5000);
   }
 
-  getRandomValue(index: number): number {
+  initChart() {
+    return {
+      title: { text: 'ECharts example' },
+      tooltip: { trigger: 'axis' },
+      xAxis: {
+        type: 'category',
+        data: Array.from({ length: this.dataPoints }, (_, index) => `Time ${index + 1}`)
+      },
+      yAxis: {},
+      series: [
+        { name: 'Series 1', type: 'line', data: [] as number[] },
+        { name: 'Series 2', type: 'line', data: [] as number[] },
+        { name: 'Series 3', type: 'line', data: [] as number[] },
+        { name: 'Series 4', type: 'line', data: [] as number[] }
+      ]
+    };
+  }
 
-    const baseValue = this.currentValues[index];
+  getRandomValue(chart: any, seriesIndex: number): number {
+    const baseValue = chart.currentValues[seriesIndex];
     const variation = Math.floor(Math.random() * 10) - 4;
     const newValue = baseValue + variation;
 
-    this.currentValues[index] = newValue;
+    chart.currentValues[seriesIndex] = newValue;
 
     return Math.max(0, Math.min(newValue, 800));
   }
 
-  updateChartData() {
+  updateAllCharts() {
+    this.charts.forEach((chart) => {
+      chart.chartOption.xAxis.data.shift();
+      chart.chartOption.xAxis.data.push(`Time ${this.dataPoints + 1}`);
 
-    this.chartOption.xAxis.data.shift();
-    this.chartOption.xAxis.data.push(`Time ${this.dataPoints + 1}`);
+      for (let i = 0; i < 4; i++) {
+        chart.chartOption.series[i].data.shift();
+        chart.chartOption.series[i].data.push(this.getRandomValue(chart, i));
+      }
 
-    for (let i = 0; i < 4; i++) {
-      this.chartOption.series[i].data.shift();
-      this.chartOption.series[i].data.push(this.getRandomValue(i));
-    }
+      // 🚀 Обновляем ссылку на объект, чтобы Angular увидел изменения
+      chart.chartOption = Object.assign({}, chart.chartOption);
+    });
 
     this.dataPoints++;
   }

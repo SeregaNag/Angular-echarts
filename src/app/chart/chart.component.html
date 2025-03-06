@@ -1,0 +1,16 @@
+<div class="charts-container">
+    <div *ngFor="let chart of charts; let i = index" class="chart-wrapper">
+      <apx-chart *ngIf="chart"
+        [series]="chart.series"
+        [chart]="chart.chart"
+        [xaxis]="chart.xaxis"
+        [yaxis]="chart.yaxis"
+        [dataLabels]="chart.dataLabels"
+        [stroke]="chart.stroke"
+        [legend]="chart.legend"
+        [title]="chart.title"
+        [grid]="chart.grid">
+      </apx-chart>
+    </div>
+  </div>
+  

@@ -3,6 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { NgxEchartsModule } from 'ngx-echarts';
 import * as echarts from 'echarts';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { ChartModule } from './chart/chart.module';
 
 @NgModule({
   declarations: [
@@ -10,7 +12,9 @@ import * as echarts from 'echarts';
   ],
   imports: [
     BrowserModule,
-    NgxEchartsModule.forRoot({ echarts })  // Подключение ngx-echarts
+    NgxEchartsModule.forRoot({ echarts }),
+    NgApexchartsModule,
+    ChartModule  // Подключение ngx-echarts
   ],
   providers: [{ provide: 'echarts', useValue: echarts }],
   bootstrap: [AppComponent]
